@@ -25,6 +25,7 @@ dist-ssr
 
 # Virtual environment
 venv/
+.venv/
 
 # Folders to ignore
 uploads/
