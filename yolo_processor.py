@@ -101,7 +101,7 @@ class YOLOVideoProcessor:
             else:
                 congestion = "smooth"
 
-            draw_text_with_background(frame, f"Total Cars: {total_cars}", (7, 50),
+            draw_text_with_background(frame, f"Total Vehicles: {total_cars}", (7, 50),
                                     bg_color=(0, 0, 0), text_color=(0, 255, 0))
             draw_text_with_background(frame, f"Road Condition: {congestion}", (7, 90),
                                     bg_color=(0, 0, 0), text_color=(0, 255, 0))
