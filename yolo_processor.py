@@ -47,6 +47,10 @@ class YOLOVideoProcessor:
 
         frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        
+        # ✅ Define ROI as the full video frame
+        roi_polygon = [(0, 0), (frame_width, 0), (frame_width, frame_height), (0, frame_height)]
+
 
         fourcc = cv2.VideoWriter_fourcc('H', '2', '6', '4')
         out = cv2.VideoWriter(self.output_path, fourcc, fps, (frame_width, frame_height))
@@ -58,7 +62,7 @@ class YOLOVideoProcessor:
             if not ret:
                 break
 
-            results = self.model.track(frame, persist=True, tracker=tracker_cfg, classes=self.classes, conf=0.25)
+            results = self.model.track(frame, persist=True, tracker=tracker_cfg, classes=self.classes, conf=0.15)
 
             # ✅ Use xywh (center format) for consistency with tracker
             boxes = results[0].boxes.xywh.cpu().numpy() if results[0].boxes else []
@@ -70,6 +74,15 @@ class YOLOVideoProcessor:
             for box, track_id, conf in zip(boxes, track_ids, confidences):
                 total_cars += 1
                 x, y, w, h = box
+                
+                center_point = (int(x), int(y))
+
+                # ✅ Check if inside full-frame ROI (always true, but kept for flexibility)
+                if not self.is_in_region(center_point, roi_polygon):
+                    continue
+
+                # total_cars += 1
+                
                 color = get_color_for_id(track_id)
 
                 # Convert from xywh to pixel coordinates
@@ -93,6 +106,9 @@ class YOLOVideoProcessor:
                 pts = np.array(self.track_history[track_id]).reshape((-1, 1, 2))
                 cv2.polylines(frame, [pts], isClosed=False, color=color, thickness=2)
 
+            # ✅ Draw ROI border (yellow)
+            cv2.polylines(frame, [np.array(roi_polygon, np.int32)], True, (0, 255, 255), 2)
+            
             # Congestion detection
             if total_cars >= self.heavy_threshold:
                 congestion = "heavy"
