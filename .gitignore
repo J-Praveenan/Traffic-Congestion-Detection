@@ -25,7 +25,14 @@ dist-ssr
 
 # Virtual environment
 venv/
+.venv/
 
 # Folders to ignore
 uploads/
 results/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
